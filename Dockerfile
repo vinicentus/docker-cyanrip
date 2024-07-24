@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 FROM alpine:3.17 AS builder
-ARG cyanrip_version=v0.9.0
+ARG cyanrip_version=v0.9.3.1
 WORKDIR /tmp
 RUN <<EOF
 #!/bin/sh
