@@ -21,4 +21,18 @@ services:
     # -D sets the output directory. {album}{if #releasecomment# > #0# (|releasecomment|)} [{format}] is the defautl value, and we want the base folder to be output
     # -G means don't embed cover art
     # -R sets the musicbrainz release id (for example 1708c609-ce4f-41ff-957f-e9cbfea479f6)
-    command: "-s 679 -O -p 1=track -T os_unicode -Q -D '/output/{album}{if #releasecomment# > #0# (|releasecomment|)} [{format}]' -G -K -N"
+    # List form so each arg is passed separately; entrypoint quotes for the inner shell
+    command:
+      - "-s"
+      - "679"
+      - "-O"
+      - "-p"
+      - "1=track"
+      - "-T"
+      - "os_unicode"
+      - "-Q"
+      - "-D"
+      - "/output/{album}{if #releasecomment# > #0# (|releasecomment|)} [{format}]"
+      - "-G"
+      - "-K"
+      - "-N"
