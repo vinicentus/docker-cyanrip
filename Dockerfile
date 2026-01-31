@@ -11,7 +11,8 @@ apk add --no-cache \
   libcdio \
   libcdio-paranoia \
   libcurl \
-  libmusicbrainz
+  libmusicbrainz \
+  util-linux
 
 apk add --no-cache --virtual .build-deps \
   cmake \
@@ -40,13 +41,16 @@ apk del --purge \
   busybox \
   .build-deps
 
+# Keep script(1) for entrypoint (PTY line normalization); nuke the rest of /usr/bin
+cp /usr/bin/script /usr/local/bin/script
 rm -rf /usr/bin /usr/sbin /lib/apk
 EOF
 
 FROM scratch AS cyanrip
 COPY --from=builder /lib /lib
 COPY --from=builder /usr /usr
+COPY entrypoint.sh /wrapper.sh
 
 LABEL maintainer="https://github.com/eq76/docker-cyanrip"
-ENTRYPOINT [ "/usr/local/bin/cyanrip" ]
+ENTRYPOINT [ "/wrapper.sh" ]
 CMD [ "-h" ]
