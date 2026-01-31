@@ -9,5 +9,6 @@ for a in "$@"; do
   quoted="$quoted '$safe'"
 done
 
-# Execute cyanrip inside a PTY and normalize CR to LF
-exec /usr/local/bin/script -q -c "/usr/local/bin/cyanrip $quoted" /dev/null | /usr/local/bin/tr '\r' '\n'
+# Execute cyanrip inside a PTY; normalize CRLF to LF, then standalone \r (progress bar) to \n
+# (tr '\r' '\n' would turn \r\n into \n\n and create extra blank lines)
+exec /usr/local/bin/script -q -c "/usr/local/bin/cyanrip $quoted" /dev/null | /usr/local/bin/sed -e 's/\r$//' -e 's/\r/\n/g'
