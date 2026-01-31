@@ -14,6 +14,11 @@ apk add --no-cache \
   libmusicbrainz \
   util-linux
 
+# Copy script, sed, and tr to /usr/local/bin before build-deps (something later removes /usr/bin)
+cp -L /usr/bin/script /usr/local/bin/script
+cp -L /bin/sed /usr/local/bin/sed
+cp -L /usr/bin/tr /usr/local/bin/tr
+
 apk add --no-cache --virtual .build-deps \
   cmake \
   curl \
@@ -41,16 +46,20 @@ apk del --purge \
   busybox \
   .build-deps
 
-# Keep script(1) for entrypoint (PTY line normalization); nuke the rest of /usr/bin
-cp /usr/bin/script /usr/local/bin/script
 rm -rf /usr/bin /usr/sbin /lib/apk
 EOF
 
+# Stage to provide /bin/sh for the scratch image
+FROM alpine:3.20 AS shell
+# (nothing to build; we only COPY /bin/sh from this image)
+
+# Minimal final stage
 FROM scratch AS cyanrip
 COPY --from=builder /lib /lib
 COPY --from=builder /usr /usr
-COPY entrypoint.sh /wrapper.sh
-
+COPY --from=shell /bin/sh /bin/sh
+COPY --chmod=755 wrapper.sh /wrapper.sh
+# Wrapper quotes "$@" for the inner shell: use command as list (a, b, c) or single string
 LABEL maintainer="https://github.com/eq76/docker-cyanrip"
 ENTRYPOINT [ "/wrapper.sh" ]
 CMD [ "-h" ]
