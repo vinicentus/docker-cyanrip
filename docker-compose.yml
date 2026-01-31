@@ -6,8 +6,6 @@ services:
       - "/dev/disk/by-id/ata-HL-DT-ST_BD-RE_GGW-H20L_K187CIF3951:/dev/cdrom"
     volumes:
       - "/mnt/BigBoi/Apps/Cyanrip/Output:/output"
-    stdin_open: true # docker run -i
-    tty: true        # docker run -t
     # The same as vin-smb (3000)
     # user: "3000:3000"
     # entrypoint: "/bin/sh" # /bin/sh doesn't exist in the container...
