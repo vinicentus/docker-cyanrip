@@ -9,6 +9,27 @@ for a in "$@"; do
   quoted="$quoted '$safe'"
 done
 
-# Execute cyanrip inside a PTY; normalize CRLF to LF, then standalone \r (progress bar) to \n
-# (tr '\r' '\n' would turn \r\n into \n\n and create extra blank lines)
-exec /usr/local/bin/script -q -c "/usr/local/bin/cyanrip $quoted" /dev/null | /usr/local/bin/sed -e 's/\r$//' -e 's/\r/\n/g'
+# Execute cyanrip inside a PTY; line-buffer so output appears in real time; normalize CRLF/LF; show progress at 0%, 5%, 10%, ...
+/usr/local/bin/stdbuf -oL /usr/local/bin/script -q -c "/usr/local/bin/cyanrip $quoted" /dev/null \
+  | /usr/local/bin/stdbuf -oL /usr/local/bin/sed -e 's/\r$//' -e 's/\r/\n/g' \
+  | while IFS= read -r line; do
+  case "$line" in
+    *progress\ -\ [0-9]*.*%*)
+      p=$(echo "$line" | /usr/local/bin/stdbuf -oL /usr/local/bin/sed -n 's/.*progress - \([0-9]*\)\.[0-9]*%.*/\1/p')
+      if [ -n "$p" ]; then
+        bucket=$(( (p / 5) * 5 ))
+        : "${last:=-1}"
+        if [ "$bucket" -gt "$last" ] && [ $((bucket % 5)) -eq 0 ]; then
+          echo "$line"
+          last=$bucket
+        fi
+      else
+        echo "$line"
+      fi
+      ;;
+    *)
+      echo "$line"
+      last=-1
+      ;;
+  esac
+done

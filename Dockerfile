@@ -12,12 +12,15 @@ apk add --no-cache \
   libcdio-paranoia \
   libcurl \
   libmusicbrainz \
-  util-linux
+  util-linux \
+  sed \
+  coreutils
 
-# Copy script, sed, and tr to /usr/local/bin before build-deps (something later removes /usr/bin)
+# Copy script, sed, tr, stdbuf to /usr/local/bin before build-deps (something later removes /usr/bin)
 cp -L /usr/bin/script /usr/local/bin/script
 cp -L /bin/sed /usr/local/bin/sed
 cp -L /usr/bin/tr /usr/local/bin/tr
+cp -L /usr/bin/stdbuf /usr/local/bin/stdbuf
 
 apk add --no-cache --virtual .build-deps \
   cmake \
